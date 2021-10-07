@@ -4,6 +4,8 @@ from .models import *
 from .forms import *
 from django.shortcuts import render, get_object_or_404
 from django.shortcuts import redirect
+from django.db.models import Sum
+from _decimal import Decimal
 
 now = timezone.now()
 
@@ -162,3 +164,31 @@ def product_delete(request, pk):
     product.delete()
 
     return redirect('crm:product_list')
+
+
+@login_required
+def summary(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    customers = Customer.objects.filter(created_date__lte=timezone.now())
+    services = Service.objects.filter(cust_name=pk)
+    products = Product.objects.filter(cust_name=pk)
+    sum_service_charge = \
+        Service.objects.filter(cust_name=pk).aggregate(Sum('service_charge'))
+    sum_product_charge = \
+        Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
+
+    # if no product or service records exist for the customer,
+
+    # change the ‘None’ returned by the query to 0.00
+    sum = sum_product_charge.get("charge__sum")
+    if sum == None:
+        sum_product_charge = {'charge__sum': Decimal('0')}
+    sum = sum_service_charge.get("service_charge__sum")
+    if sum == None:
+        sum_service_charge = {'service_charge__sum': Decimal('0')}
+
+    return render(request, 'crm/summary.html', {'customer': customer,
+                                                'products': products,
+                                                'services': services,
+                                                'sum_service_charge': sum_service_charge,
+                                                'sum_product_charge': sum_product_charge, })
