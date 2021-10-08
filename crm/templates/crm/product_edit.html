@@ -2,8 +2,8 @@
 <html lang="en">
 {% extends 'crm/base.html' %}
 {% block content %}
-    <h1>Edit Service</h1>
-    <form method="POST" class="service-form">{% csrf_token %}
+    <h1>Edit Product</h1>
+    <form method="POST" class="product-form">{% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="save btn btn-default">Update</button>
     </form>

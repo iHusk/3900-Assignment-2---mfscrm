@@ -27,6 +27,14 @@
     </div>
     <div class="row">
         <h2 style="padding-left: 15Px">Products Information</h2>
+        <a href="" style="float: right">
+            <form action="{% url "crm:generate_csv" %}" method="post" style="padding: 0px 15px 15px 15px">
+                {% csrf_token %}
+                <input type="hidden" id="table" name="table" value="products">
+                <input id="products" class="btn btn-info" type="submit" value="Download CSV">
+            </form>
+        </a>
+        <a href="{% url 'crm:product_new' %}" class="btn btn-primary" style="float: right;">Add Product</a>
     </div>
     <div>
         <table class="table table-striped table-bordered table-hover">
@@ -64,8 +72,7 @@
     </div>
 
     <div class="row">
-        <a href="{% url 'crm:product_new' %}" class="row"><span
-                class="btn btn-primary">Add Product</span></a>
+
     </div>
     </body>
 {% endblock %}

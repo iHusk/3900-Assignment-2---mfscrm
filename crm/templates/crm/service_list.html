@@ -5,7 +5,6 @@
         <meta charset="UTF-8">
         <title>Maverick Food service</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-
     </head>
     <body>
     <style>
@@ -27,6 +26,14 @@
     </div>
     <div class="row">
         <h2 style="padding-left: 15Px">Services Information</h2>
+        <a href="" style="float: right;">
+            <form action="{% url "crm:generate_csv" %}" method="post" style="padding: 0px 15px 15px 15px">
+                {% csrf_token %}
+                <input type="hidden" id="table" name="table" value="service">
+                <input id="service" class="btn btn-info" type="submit" value="Download CSV">
+            </form>
+        </a>
+        <a href="{% url 'crm:service_new' %}" class="btn btn-primary" style="float: right">Add Service</a>
     </div>
     <div>
         <table class="table table-striped table-bordered table-hover">
@@ -62,12 +69,8 @@
             {% endfor %}
             </tbody>
         </table>
-
     </div>
-
-    <div class="row">
-        <a href="{% url 'crm:service_new' %}" class="row"><span
-                class="btn btn-primary">Add Service</span></a>
+    <div class="row" style="padding-left: 15px; padding-bottom: 15px">
     </div>
     </body>
 {% endblock %}
