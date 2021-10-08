@@ -8,7 +8,6 @@
         <meta charset="UTF-8">
         <title>Maverick Food Services</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-
     </head>
     <body>
     <style>
@@ -17,7 +16,7 @@
         }
     </style>
     <div class="container">
-        <div class="row">
+        <div class="row" style="width: 100%">
             <div class="col-md-10 col-md-offset-1">
                 <div class="panel panel-primary">
                     <div class="panel-heading">Welcome!</div>
@@ -27,11 +26,16 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
         <h2 style="padding-left: 15Px">Customer Information</h2>
-    </div>
-    <div>
+        <a href="" style="float: right;">
+            <form action="{% url "crm:generate_csv" %}" method="post" style="padding-bottom: 15px">
+                {% csrf_token %}
+                <input type="hidden" id="table" name="table" value="customers">
+                <input id="customers" class="btn btn-info" type="submit" value="Download CSV">
+            </form>
+        </a>
+        <div>
+        </div>
         <table class="table table-striped table-bordered table-hover">
             <thead>
             <tr class="bg-info">
@@ -65,19 +69,16 @@
                     <td>{{ customer.state }}</td>
                     <td>{{ customer.zipcode }}</td>
                     <td><a href="{% url 'crm:customer_edit' pk=customer.pk %}" class="btn btn-warning">Edit</a>
-
                     <td><a href="{% url 'crm:customer_delete' pk=customer.pk %}"
                            onclick="return confirm('Are you sure you want to delete?')"
                            class="btn btn-danger">Delete</a>
                     </td>
                     <td><a href="{% url 'crm:summary' pk=customer.pk %}"
                            class="btn btn-primary">Summary</a>
-
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-
     </div>
     </body>
     </html>

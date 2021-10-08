@@ -1,10 +1,16 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
 from .models import *
 from .forms import *
-from django.shortcuts import render, get_object_or_404
-from django.shortcuts import redirect
+from .utils import *
+
+import datetime
+import csv
+
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
+from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.template.defaultfilters import slugify
+
 from _decimal import Decimal
 
 now = timezone.now()
@@ -74,7 +80,6 @@ def service_new(request):
 
     else:
         form = ServiceForm()
-        # print("Else")
 
     return render(request, 'crm/service_new.html', {'form': form})
 
@@ -95,7 +100,6 @@ def service_edit(request, pk):
             return render(request, 'crm/service_list.html', {'services': services})
 
     else:
-        # print("else")
         form = ServiceForm(instance=service)
 
     return render(request, 'crm/service_edit.html', {'form': form})
@@ -131,7 +135,6 @@ def product_new(request):
 
     else:
         form = ProductForm()
-        # print("Else")
 
     return render(request, 'crm/product_new.html', {'form': form})
 
@@ -177,9 +180,6 @@ def summary(request, pk):
     sum_product_charge = \
         Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
 
-    # if no product or service records exist for the customer,
-
-    # change the ‘None’ returned by the query to 0.00
     sum = sum_product_charge.get("charge__sum")
     if sum == None:
         sum_product_charge = {'charge__sum': Decimal('0')}
@@ -192,3 +192,57 @@ def summary(request, pk):
                                                 'services': services,
                                                 'sum_service_charge': sum_service_charge,
                                                 'sum_product_charge': sum_product_charge, })
+
+
+@login_required
+def generate_pdf(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    customers = Customer.objects.filter(created_date__lte=timezone.now())
+    services = Service.objects.filter(cust_name=pk)
+    products = Product.objects.filter(cust_name=pk)
+    sum_service_charge = \
+        Service.objects.filter(cust_name=pk).aggregate(Sum('service_charge'))
+    sum_product_charge = \
+        Product.objects.filter(cust_name=pk).aggregate(Sum('charge'))
+
+    template_name = "generate/pdf.html"
+
+    context_dict = {'customer': customer,
+                    'products': products,
+                    'services': services,
+                    'sum_service_charge': sum_service_charge,
+                    'sum_product_charge': sum_product_charge,
+                    }
+
+    pdf_name = f'{datetime.datetime.now().strftime("%Y-%m-%d")}---{slugify(customer.cust_name)}-summary'
+
+    return render_to_pdf(template_name, pdf_name, context_dict)
+
+
+@login_required
+def generate_csv(request):
+    print(request.POST['table'])
+
+    if request.method == 'POST':
+        if request.POST['table'] == "service":
+            table = Service
+        elif request.POST['table'] == "products":
+            table = Product
+        elif request.POST['table'] == "customers":
+            table = Customer
+
+        model_class = table
+        meta = model_class._meta
+
+        field_names = [field.name for field in meta.fields]
+
+        response = HttpResponse(content_type='text/csv')
+        csv_name = f'{datetime.datetime.now().strftime("%Y-%m-%d")}---{slugify(model_class)[15:]}s'
+        response['Content-Disposition'] = f'attachment; filename={csv_name}.csv'
+        writer = csv.writer(response)
+
+        writer.writerow(field_names)
+        for obj in model_class.objects.all():
+            row = writer.writerow([getattr(obj, field) for field in field_names])
+
+        return response

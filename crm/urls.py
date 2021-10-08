@@ -1,4 +1,3 @@
-from django.conf.urls import url
 from . import views
 from django.urls import path, re_path
 
@@ -19,4 +18,6 @@ urlpatterns = [
     path('product/<int:pk>/edit/', views.product_edit, name='product_edit'),
     path('product/<int:pk>/delete/', views.product_delete, name='product_delete'),
     path('customer/<int:pk>/summary/', views.summary, name='summary'),
+    path('customer/<int:pk>/summary/generate_pdf/', views.generate_pdf, name='generate_pdf'),
+    path('service_list/generate_csv', views.generate_csv, name='generate_csv'),
 ]

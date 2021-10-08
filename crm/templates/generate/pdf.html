@@ -1,0 +1,153 @@
+{% load humanize %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            font-family: Helvetica, SansSerif, Roboto, sans-serif;
+        }
+
+        h1 {
+            font-size: x-large;
+        }
+
+        span {
+            font-weight: lighter;
+        }
+
+        table {
+            table-layout: fixed;
+            width: 100%;
+            border: 1px solid black;
+        }
+
+        .borderless {
+            border: 0px;
+        }
+
+        table th {
+            text-align: left;
+            padding: 3px 3px 0;
+            background-color: darkgray;
+        }
+
+        table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 3px 3px 0;
+        }
+
+        .total {
+            text-align: right;
+            background-color: white
+        }
+    </style>
+</head>
+<header>
+    <table class="borderless">
+        <tr>
+            <td>
+                <h1>Customer Summary for <span>{{ customer.cust_name }}</span></h1>
+            </td>
+            <td>
+                <h3 style="text-align: right">{% now "SHORT_DATETIME_FORMAT" %}</h3>
+            </td>
+        </tr>
+    </table>
+</header>
+<body>
+
+
+<hr>
+<div>
+    <h2 style="text-align: center">Services Information</h2>
+</div>
+<div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Service Category</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Setup Time</th>
+            <th>Cleanup Time</th>
+            <th>Service Charge</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for service in services %}
+            <tr>
+                <td>{{ service.service_category }}</td>
+                <td>{{ service.description }}</td>
+                <td>{{ service.location }}</td>
+                <td>{{ service.setup_time }}</td>
+                <td>{{ service.cleanup_time }}</td>
+                <td>${{ service.service_charge|floatformat:2|intcomma }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr>
+            <th colspan="5">Total Service Charges</th>
+            <th>${{ sum_service_charge.service_charge__sum|floatformat:2|intcomma }}</th>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+<br>
+<div>
+    <h2 style="text-align: center">Product Information</h2>
+</div>
+<div>
+    <table class="table">
+    <thead>
+    <tr>
+        <th>Product</th>
+        <th>Description</th>
+        <th>Quantity</th>
+        <th>Pickup Time</th>
+        <th>Total Charge</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    {% for product in products %}
+        <tr>
+            <td>{{ product.product }}</td>
+            <td>{{ product.p_description }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>{{ product.pickup_time }}</td>
+            <td>${{ product.charge|floatformat:2|intcomma }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <th colspan="4">Total Product Charges</th>
+        <th>${{ sum_product_charge.charge__sum|floatformat:2|intcomma }}</th>
+    </tr>
+    </tfoot>
+    </table>
+</div>
+<br>
+<hr>
+<br>
+<div>
+    <table class="borderless">
+        <thead>
+        <tr>
+            <th colspan="4" class="total">
+                <h1>Total of Service and Product Charges</h1>
+            </th>
+            <th class="total" style="text-align: left;">
+               <h1> ${{ sum_service_charge.service_charge__sum|add:sum_product_charge.charge__sum|floatformat:2|intcomma }}</h1>
+            </th>
+        </tr>
+        </thead>
+    </table>
+</div>
+</body>
+</html>
